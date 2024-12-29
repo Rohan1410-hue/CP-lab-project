@@ -7,7 +7,7 @@
 #include<sstream>
 using namespace std;
 int current_guest = 0;
-fstream current_record,history, current_record_new,meal,database;
+fstream current_record,history, current_record_new,meal,database, room_file;;
 int customer_booked = 0;
 int price_per_room = 10000;
 const int  rooms = 108;
@@ -25,10 +25,11 @@ struct room {
 	bool booking;	
 }arr_room[floors][rooms_per_floor],penthouse_arr[penthouse_floors][penthouse_rooms];
 struct customer {
-	int customer_id = rand() % 10000;
+	int customer_id;
 	string customer_name;
 	int time_duration;
 	float meal_charges;
+	room Room;
 }guests[max_guests],arr_customer[rooms];
 //string funct(int i,int j)
 //{
@@ -62,57 +63,72 @@ void check_room_availability()
 }
 void room_book()
 {
-	for (int i = 0;i <=current_guest;i++)
-	{
-		if (i == current_guest)
+		for (int i = 0;i <= current_guest;i++)
 		{
-			int floor_input,room_input;
-			cout << "Enter floor from 1 to 6:";
-			cin>> floor_input;
-			cout << "Enter your room :\n";
-			cin >> room_input;
-			if (floor_input >floors || room_input > rooms_per_floor|| room_input < 1) {
-				cout << "Wrong floor!\n";
-			}
-			if (arr_room[floor_input - 1][room_input - 1].booking==true) {
-				cout << "Room already booked.\n";
-			}
-			else {
-				arr_room[floor_input - 1][room_input - 1].booking = true;
-				cout << "Room booked successfully.\n";
-			}
-			/*else {
-				arr_room.booking = true;
-				for (int i = 0;i < 6;i++)
-				{
-					for (int j = 0;j < 14;j++) {
-						if (i + 1 == arr_room.floor && j + 1 == arr_room.room)
-						{
-							if (room_data[i][j] == "Booked")
+			customer* guest = &guests[i];
+			cout << "Your customer ID is : ";
+			guest->customer_id = rand()% 10000 + 1;
+			cout << guest->customer_id;
+			cout << "Enter name: ";
+			cin>> guest->customer_name;
+			cout << "Enter days for stay:";
+			cin >> guest->time_duration;
+			guest->meal_charges = 0;
+				int floor_input, room_input;
+				cout << "Enter floor from 1 to 6:";
+				cin >> floor_input;
+				cout << "Enter your room :\n";
+				cin >> room_input;
+				if (floor_input > floors || room_input > rooms_per_floor || room_input < 1) {
+					cout << "Wrong floor!\n";
+				}
+				if (arr_room[floor_input - 1][room_input - 1].booking == true) {
+					cout << "Room already booked.\n";
+				}
+				else {
+					arr_room[floor_input - 1][room_input - 1].booking = true;
+					guest->Room.floor= floor_input;
+					guest->Room.room = room_input;
+					guest->Room.booking = true;
+					cout << "Room booked successfully.\n";
+				}
+				room_file.open("room_file.txt", ios::app);
+				if (room_file.is_open()) {
+					room_file << guest->customer_id << " " << guest->customer_name << " "<< guest->time_duration<<" "<< guest->meal_charges<<" "<< guest->Room.floor << " " << guest->Room.room << endl;
+				}
+
+				/*else {
+					arr_room.booking = true;
+					for (int i = 0;i < 6;i++)
+					{
+						for (int j = 0;j < 14;j++) {
+							if (i + 1 == arr_room.floor && j + 1 == arr_room.room)
 							{
-								cout << "Already booked!\n";
-							}
-							else if (room_data[arr_room.floor - 1][arr_room.room - 1] == "Booked") {
-								cout << "Room is already booked!\n";
-							}
-							else {
-								room_data[i][j] = "Booked";
-								cout << "Booking completed successfully!\n";
-								customer_booked++;
+								if (room_data[i][j] == "Booked")
+								{
+									cout << "Already booked!\n";
+								}
+								else if (room_data[arr_room.floor - 1][arr_room.room - 1] == "Booked") {
+									cout << "Room is already booked!\n";
+								}
+								else {
+									room_data[i][j] = "Booked";
+									cout << "Booking completed successfully!\n";
+									customer_booked++;
+								}
 							}
 						}
 					}
-				}
-				for (int i = 0;i < floors - 2;i++) {
-					cout << "Floor " << i + 1 << ": ";
-					for (int j = 0;j < rooms_per_floor;j++) {
-						cout << room_data[i][j] << setw(10);
+					for (int i = 0;i < floors - 2;i++) {
+						cout << "Floor " << i + 1 << ": ";
+						for (int j = 0;j < rooms_per_floor;j++) {
+							cout << room_data[i][j] << setw(10);
+						}
+						cout << endl;
 					}
-					cout << endl;
-				}
-			}*/
+				}*/
+			
 		}
-	}
 }
 string line,arr_line[3];
 void manage_guest_details()
@@ -236,11 +252,14 @@ const int max_members = 7;
 //}
 void item(string food,float price)
 {
+	int i = 0;
+	customer meal_arr[max_guests];
 	cout << "Enter customer_ID:";
 	float total;
 	int inp_ID;
 	cin >> inp_ID;
 	for (int i = 0;i < current_guest;i++) {
+		string line;
 		if (guests[i].customer_id == inp_ID)
 		{
 			cout << "Enter quantity:";
@@ -249,17 +268,14 @@ void item(string food,float price)
 			total = price * quantity;
 			guests[i].meal_charges = total;
 			cout << "Order placed successfully!\n";
-				/*current_record.open("current_record.txt", ios::in);*/
-				/*if (current_record.is_open()) {
-					while (getline(current_record, line)) {
-						if (stoi(line) == inp_ID) {
-							meal.open("meal.txt", ios::app);
-							if (meal.is_open()) {
-								meal << inp_ID << " " << food << " " << "$" << price << endl;
-							}
-						}
-					}
-				}*/
+			/*room_file.open("room_file.txt", ios::in);
+			if (room_file.is_open()) {
+				while (getline(room_file, line)) {
+					stringstream ss(line);
+					ss >> meal_arr[i].customer_id;
+			
+				}
+			}*/
 		}
 	}
 }
@@ -397,22 +413,77 @@ void check_out()
 }
 void bill()
 {
+	/*customer read_data[max_guests];
+	string line;
 	cout << "Enter customer_id:";
 	int inp_id;
 	cin>> inp_id;
-	for (int i = 0;i < current_guest;i++)
-	{
-		if (guests[i].customer_id == inp_id) {
-			cout << "Customer ID:" << guests[i].customer_id << endl;
-			cout << "Stay duration:" << guests[i].time_duration<< endl;
-			cout << "Room rate per room:" << room_rate << endl;
-			cout << "Total meal charge:" << guests[i].meal_charges << endl;
-			cout << "Additional service fee:" << service_fee << endl;
-			cout << "--------------\n";
-			float total = guests[i].time_duration * room_rate + guests[i].meal_charges + service_fee;
-			cout << "Total Bill :" << total << endl;
+	room_file.open("room_file.txt",ios::in);
+	int i = 0;
+		if (room_file.is_open())
+		{
+			while (getline(room_file, line)) {
+				stringstream ss(line);
+				ss >> read_data[i].customer_id;
+				ss >> read_data[i].customer_name;
+				ss >> read_data[i].time_duration;
+				ss >> read_data[i].meal_charges;
+				ss >> read_data[i].Room.floor;
+				ss >> read_data[i].Room.room;
+				i++;
+			}
 		}
-	}    
+		room_file.close();
+		for (int j = 0;i < i-1;j++)
+		{
+			cout << read_data[j].customer_id << read_data[j].customer_name << read_data[j].time_duration;
+			if (read_data[i].customer_id == inp_id) {
+				cout << "Customer ID:" << read_data[j].customer_id << endl;
+				cout << "Stay duration:" << read_data[j].time_duration << endl;
+				cout << "Room rate per room:" << room_rate << endl;
+				cout << "Total meal charge:" << read_data[j].meal_charges << endl;
+				cout << "Additional service fee:" << service_fee << endl;
+				cout << "--------------\n";
+				float total = read_data[j].time_duration * room_rate + read_data[j].meal_charges + service_fee;
+				cout << "Total Bill :" << total << endl;
+			}
+		}*/
+
+	int customerID;
+	cout << "Enter customer ID: ";
+	cin >> customerID;
+
+	fstream room_file("room_file.txt", ios::in);
+	if (room_file.is_open()) {
+		string line;
+		bool customerFound = false;
+		while (getline(room_file, line)) {
+			stringstream ss(line);
+			customer Customer;
+			ss >> Customer.customer_id>> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
+			if (Customer.customer_id == customerID) {
+				float totalBill = Customer.time_duration * room_rate + Customer.meal_charges +service_fee;
+				cout << "--- Bill ---\n";
+				cout << "Customer ID: " << Customer.customer_id << "\n";
+				cout << "Name: " << Customer.customer_name << "\n";
+				cout << "Stay Duration: " << Customer.time_duration << "\n";
+				cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
+				cout << "Meal Charges: " << Customer.meal_charges << "\n";
+				cout << "Service Fee: " << service_fee << "\n";
+				cout << "Total Bill: " << totalBill << "\n";
+				customerFound = true;
+				break;
+			}
+		}
+		room_file.close();
+
+		if (!customerFound) {
+			cout << "Customer not found.\n";
+		}
+	}
+	else {
+		cerr << "Error reading customer file.\n";
+	}
 }
 void guest()
 {
@@ -430,7 +501,6 @@ void guest()
 		cout << "9. Manage Special Requests\n";
 		cout << "10. Log Out\n";
 		cout << "Enter your services:";
-		initializerooms();
 		int services;
 		cin >> services;
 		switch (services)
@@ -453,15 +523,17 @@ void guest()
 		case 6:
 			check_out();
 			break;
-		//case 7:
-			/*bill(customer_id, stay_duration, room_rate, meal_charge, service_fee);*/
+		case 7:
+			bill();
+			break;
 		}
 		cout << "Press any key to continue :";
 		cin >> cont;
-	} while (cont!=" ");
+	} while (cont!="e");
 }
 int main()
 {
+	initializerooms();
 	srand(time(0));
 	cout << "1. Staff \n";
 	cout << "2. Guest \n";
