@@ -7,7 +7,7 @@
 #include<sstream>
 using namespace std;
 int current_guest = 0;
-fstream current_record,history, current_record_new,meal,database, room_file;;
+fstream current_record,history, current_record_new,meal,database, room_file;
 int customer_booked = 0;
 int price_per_room = 10000;
 const int  rooms = 108;
@@ -358,43 +358,81 @@ void check_out()
 			guests[i].customer_name.clear();
 		}
 	}
-	void bill()
-	{
-		int customerID;
-		cout << "Enter customer ID: ";
-		cin >> customerID;
-		fstream room_file("room_file.txt", ios::in);
-		if (room_file.is_open()) {
-			string line;
-			bool customerFound = false;
-			while (getline(room_file, line)) {
-				stringstream ss(line);
-				customer Customer;
-				ss >> Customer.customer_id >> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
-				if (Customer.customer_id == customerID) {
-					float totalBill = Customer.time_duration * room_rate + Customer.meal_charges + service_fee;
-					cout << "--- Bill ---\n";
-					cout << "Customer ID: " << Customer.customer_id << "\n";
-					cout << "Name: " << Customer.customer_name << "\n";
-					cout << "Stay Duration: " << Customer.time_duration << "\n";
-					cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
-					cout << "Meal Charges: " << Customer.meal_charges << "\n";
-					cout << "Service Fee: " << service_fee << "\n";
-					cout << "Total Bill: " << totalBill << "\n";
-					customerFound = true;
-				}
-			}
-			room_file.close();
+}
 
-			if (!customerFound) {
-				cout << "Customer not found.\n";
+//void bill()
+//{
+//		int customerID;
+//		cout << "Enter customer ID: ";
+//		cin >> customerID;
+//		fstream room_file("room_file.txt", ios::in);
+//		if (room_file.is_open()) {
+//			string line;
+//			bool customerFound = false;
+//			while (getline(room_file, line)) {
+//				stringstream ss(line);
+//				customer Customer;
+//				ss >> Customer.customer_id >> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
+//				if (Customer.customer_id == customerID) {
+//					float totalBill = Customer.time_duration * room_rate + Customer.meal_charges + service_fee;
+//					cout << "--- Bill ---\n";
+//					cout << "Customer ID: " << Customer.customer_id << "\n";
+//					cout << "Name: " << Customer.customer_name << "\n";
+//					cout << "Stay Duration: " << Customer.time_duration << "\n";
+//					cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
+//					cout << "Meal Charges: " << Customer.meal_charges << "\n";
+//					cout << "Service Fee: " << service_fee << "\n";
+//					cout << "Total Bill: " << totalBill << "\n";
+//					customerFound = true;
+//				}
+//			}
+//			room_file.close();
+//
+//			if (!customerFound) {
+//				cout << "Customer not found.\n";
+//			}
+//		}
+//		else {
+//			cout << "Error reading customer file.\n";
+//		}
+//	}
+//}
+
+void bill() {
+	int customerID;
+	cout << "Enter customer ID: ";
+	cin >> customerID;
+	fstream room_file("room_file.txt", ios::in);
+	if (room_file.is_open()) {
+		string line;
+		bool customerFound = false;
+		while (getline(room_file, line)) {
+			stringstream ss(line);
+			customer Customer;
+			ss >> Customer.customer_id >> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
+			if (Customer.customer_id == customerID) {
+				float totalBill = Customer.time_duration * room_rate + Customer.meal_charges + service_fee;
+				cout << "--- Bill ---\n";
+				cout << "Customer ID: " << Customer.customer_id << "\n";
+				cout << "Name: " << Customer.customer_name << "\n";
+				cout << "Stay Duration: " << Customer.time_duration << "\n";
+				cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
+				cout << "Meal Charges: " << Customer.meal_charges << "\n";
+				cout << "Service Fee: " << service_fee << "\n";
+				cout << "Total Bill: " << totalBill << "\n";
+				customerFound = true;
 			}
 		}
-		else {
-			cout << "Error reading customer file.\n";
+		room_file.close();
+		if (!customerFound) {
+			cout << "Customer not found.\n";
 		}
 	}
+	else {
+		cout << "Error reading customer file.\n";
+	}
 }
+
 void view_or_edit_reservations() {
 	fstream room_file;
 	room_file.open("room_file.txt", ios::in);
