@@ -236,20 +236,6 @@ void room_delivery()
 	cout << "Your order has been placed\n";
 }
 const int max_members = 7;
-//void dining_table()
-//{
-//	cout << "Enter your members:";
-//	int members;
-//	cin>> members;
-//	if (members <= max_members)
-//	{
-//		for(int i=2;i<=7;i++)
-//	}
-//}
-//void buffet()
-//{
-//
-//}
 void item(string food,float price)
 {
 	int i = 0;
@@ -268,14 +254,6 @@ void item(string food,float price)
 			total = price * quantity;
 			guests[i].meal_charges = total;
 			cout << "Order placed successfully!\n";
-			/*room_file.open("room_file.txt", ios::in);
-			if (room_file.is_open()) {
-				while (getline(room_file, line)) {
-					stringstream ss(line);
-					ss >> meal_arr[i].customer_id;
-			
-				}
-			}*/
 		}
 	}
 }
@@ -366,15 +344,6 @@ void meal_options()
 	}
 	meal_func();
 }
-void delete_record(customer c)
-{
-	current_record_new.open("current_record_new.txt", ios::app);
-	if (current_record_new.is_open()) {
-		current_record_new << c.customer_id<<" "<<c.customer_name;
-	}
-	else cout << "Error file not opened!";
-	current_record_new.close();
-}
 int z = 0;
 void check_out()
 {
@@ -383,168 +352,196 @@ void check_out()
 	cin >> input_ID;
 	for (int i = 0;i < current_guest;i++) {
 		if (guests[i].customer_id == input_ID) {
-			guests[i].time_duration=0;
+			guests[i].time_duration = 0;
 			guests[i].meal_charges = 0;
 			cout << "Check-out successful for guest " << guests[i].customer_name << ".\n";
 			guests[i].customer_name.clear();
 		}
 	}
-	/*string line;
-	customer c;
-	current_record.open("current_record.txt", ios::in);
-	if (current_record.is_open()) {
-		while (getline(current_record, line)) {
-			stringstream ss(line);
-			ss >> c.customer_id; 
-			ss >> c.customer_name; 
-			if (c.customer_id == input_ID) {
-				history_funct(c);
-				delete_record(c);
-			}
-			else cout << "ID not found";
-		}
-	}
-	else cout << "Error file not opened!";
-	current_record.close();
-	const char* current_record = "current_record.txt";
-	const char* current_record_new = "current_record_new.txt";
-	remove("current_record.txt");
-	rename("current_record.txt", "current_record_new.txt");*/
-}
-void bill()
-{
-	/*customer read_data[max_guests];
-	string line;
-	cout << "Enter customer_id:";
-	int inp_id;
-	cin>> inp_id;
-	room_file.open("room_file.txt",ios::in);
-	int i = 0;
-		if (room_file.is_open())
-		{
+	void bill()
+	{
+		int customerID;
+		cout << "Enter customer ID: ";
+		cin >> customerID;
+		fstream room_file("room_file.txt", ios::in);
+		if (room_file.is_open()) {
+			string line;
+			bool customerFound = false;
 			while (getline(room_file, line)) {
 				stringstream ss(line);
-				ss >> read_data[i].customer_id;
-				ss >> read_data[i].customer_name;
-				ss >> read_data[i].time_duration;
-				ss >> read_data[i].meal_charges;
-				ss >> read_data[i].Room.floor;
-				ss >> read_data[i].Room.room;
-				i++;
+				customer Customer;
+				ss >> Customer.customer_id >> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
+				if (Customer.customer_id == customerID) {
+					float totalBill = Customer.time_duration * room_rate + Customer.meal_charges + service_fee;
+					cout << "--- Bill ---\n";
+					cout << "Customer ID: " << Customer.customer_id << "\n";
+					cout << "Name: " << Customer.customer_name << "\n";
+					cout << "Stay Duration: " << Customer.time_duration << "\n";
+					cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
+					cout << "Meal Charges: " << Customer.meal_charges << "\n";
+					cout << "Service Fee: " << service_fee << "\n";
+					cout << "Total Bill: " << totalBill << "\n";
+					customerFound = true;
+				}
+			}
+			room_file.close();
+
+			if (!customerFound) {
+				cout << "Customer not found.\n";
 			}
 		}
-		room_file.close();
-		for (int j = 0;i < i-1;j++)
-		{
-			cout << read_data[j].customer_id << read_data[j].customer_name << read_data[j].time_duration;
-			if (read_data[i].customer_id == inp_id) {
-				cout << "Customer ID:" << read_data[j].customer_id << endl;
-				cout << "Stay duration:" << read_data[j].time_duration << endl;
-				cout << "Room rate per room:" << room_rate << endl;
-				cout << "Total meal charge:" << read_data[j].meal_charges << endl;
-				cout << "Additional service fee:" << service_fee << endl;
-				cout << "--------------\n";
-				float total = read_data[j].time_duration * room_rate + read_data[j].meal_charges + service_fee;
-				cout << "Total Bill :" << total << endl;
-			}
-		}*/
+		else {
+			cout << "Error reading customer file.\n";
+		}
+	}
+}
+void view_or_edit_reservations() {
+	fstream room_file;
+	room_file.open("room_file.txt", ios::in);
 
-	int customerID;
-	cout << "Enter customer ID: ";
-	cin >> customerID;
-
-	fstream room_file("room_file.txt", ios::in);
-	if (room_file.is_open()) {
+	if (!room_file.is_open()) {
+		cout << "Could not open the file.\n";
+		return;
+	}
+	else {
+		customer reservations[max_guests];
+		int count = 0;
 		string line;
-		bool customerFound = false;
-		while (getline(room_file, line)) {
+
+		while (getline(room_file, line) && count < max_guests) {
 			stringstream ss(line);
-			customer Customer;
-			ss >> Customer.customer_id>> Customer.customer_name >> Customer.time_duration >> Customer.meal_charges >> Customer.Room.floor >> Customer.Room.room;
-			if (Customer.customer_id == customerID) {
-				float totalBill = Customer.time_duration * room_rate + Customer.meal_charges +service_fee;
-				cout << "--- Bill ---\n";
-				cout << "Customer ID: " << Customer.customer_id << "\n";
-				cout << "Name: " << Customer.customer_name << "\n";
-				cout << "Stay Duration: " << Customer.time_duration << "\n";
-				cout << "Room Charges: " << Customer.time_duration * room_rate << "\n";
-				cout << "Meal Charges: " << Customer.meal_charges << "\n";
-				cout << "Service Fee: " << service_fee << "\n";
-				cout << "Total Bill: " << totalBill << "\n";
-				customerFound = true;
+			customer* current_reservation = &reservations[count];
+			ss >> current_reservation->customer_id
+				>> current_reservation->customer_name
+				>> current_reservation->time_duration
+				>> current_reservation->meal_charges
+				>> current_reservation->Room.floor
+				>> current_reservation->Room.room;
+			count++;
+		}
+		room_file.close();
+
+		cout << "Current Reservations:\n";
+		for (int i = 0; i < count; i++) {
+			customer* current_reservation = &reservations[i];
+			cout << "ID: " << current_reservation->customer_id
+				<< ", Name: " << current_reservation->customer_name
+				<< ", Floor: " << current_reservation->Room.floor
+				<< ", Room: " << current_reservation->Room.room
+				<< ", Duration: " << current_reservation->time_duration
+				<< ", Meal Charges: " << current_reservation->meal_charges
+				<< endl;
+		}
+
+		cout << "Enter the customer ID to edit (or -1 to exit): ";
+		int input_Id;
+		cin >> input_Id;
+
+		if (input_Id < 0) return;
+
+		bool found = false;
+		for (int i = 0; i < count; i++) {
+			customer* current_reservation = &reservations[i];
+			if (current_reservation->customer_id == input_Id) {
+				found = true;
+				cout << "Editing Reservation for " << current_reservation->customer_name << ":\n";
+
+				cout << "Enter new stay duration (current: " << current_reservation->time_duration << "): ";
+				cin >> current_reservation->time_duration;
+
+				cout << "Enter new meal charges (current: " << current_reservation->meal_charges << "): ";
+				cin >> current_reservation->meal_charges;
+
+				cout << "Enter new floor and room (current: " << current_reservation->Room.floor << " / " << current_reservation->Room.room << "): ";
+				cin >> current_reservation->Room.floor >> current_reservation->Room.room;
+
+				cout << "Reservation updated successfully!\n";
 				break;
 			}
 		}
-		room_file.close();
 
-		if (!customerFound) {
-			cout << "Customer not found.\n";
+		if (!found) {
+			cout << "Reservation not found.\n";
+			return;
 		}
-	}
-	else {
-		cerr << "Error reading customer file.\n";
+
+		room_file.open("room_file.txt", ios::out);
+		if (!room_file.is_open()) {
+			cerr << "Error: Could not write to the file.\n";
+			return;
+		}
+
+		for (int i = 0; i < count; i++) {
+			customer* res = &reservations[i];
+			room_file << res->customer_id << " "
+				<< res->customer_name << " "
+				<< res->time_duration << " "
+				<< res->meal_charges << " "
+				<< res->Room.floor << " "
+				<< res->Room.room << endl;
+		}
+
+		room_file.close();
 	}
 }
-void guest()
-{
-	string cont;
-	do {
-		cout << "---Menu---\n";
-		cout << "1. Check Room Availability\n";
-		cout << "2. Book a Room\n";
-		cout << "3. Manage Guest Details\n";
-		cout << "4. Meal\n";
-		cout << "5. Check in a guest\n";
-		cout << "6. Check out a Guest\n";
-		cout << "7. Generate Bill for Stay\n";
-		cout << "8. View/Edit Reservations\n";
-		cout << "9. Manage Special Requests\n";
-		cout << "10. Log Out\n";
-		cout << "Enter your services:";
-		int services;
-		cin >> services;
-		switch (services)
-		{
-		case 1:
-			check_room_availability();
-			break;
-		case 2:
-			room_book();
-			break;
-		case 3:
-			manage_guest_details();
-			break;
-		case 4:
-			meal_options();
-			break;
-		case 5:
-			checkIN_guest();
-			break;
-		case 6:
-			check_out();
-			break;
-		case 7:
-			bill();
-			break;
-		}
-		cout << "Press any key to continue :";
-		cin >> cont;
-	} while (cont!="e");
-}
-int main()
-{
-	initializerooms();
-	srand(time(0));
-	cout << "1. Staff \n";
-	cout << "2. Guest \n";
-	int choices;
-	cout << "Enter choice:";
-	cin >> choices;
-	switch (choices)
-	{
-	case 1:
-		cout << "none";
-	case 2:
+	void guest() {
+		string cont;
+		do {
+			cout << "---Menu---\n";
+			cout << "1. Check Room Availability\n";
+			cout << "2. Book a Room\n";
+			cout << "3. Meal\n";
+			cout << "4. Check in a Guest\n";
+			cout << "5. Check out a Guest\n";
+			cout << "6. Generate Bill for Stay\n";
+			cout << "7. View/Edit Reservations\n";
+			cout << "8. Log Out\n";
+			cout << "Enter your service: ";
+
+			int services;
+			cin >> services;
+			cin.ignore(); 
+
+			switch (services) {
+			case 1:
+				check_room_availability();
+				break;
+			case 2:
+				room_book();
+				break;
+			case 3:
+				meal_options();
+				break;
+			case 4:
+				checkIN_guest();
+				break;
+			case 5:
+				check_out();
+				break;
+			case 6:
+				bill();
+				break;
+			case 7:
+				view_or_edit_reservations();
+				break;
+			case 8:
+				cout << "Logging out...\n";
+				return; 
+			default:
+				cout << "Invalid choice. Please try again.\n";
+			}
+
+			cout << "Press 'e' to exit or any other key to continue: ";
+			cin >> cont;
+			cin.ignore(); 
+		} while (cont != "e");
+	}
+
+	int main() {
+		initializerooms();
+		srand((time(0))); 
 		guest();
+		return 0;
 	}
-}
+
+	
